@@ -1,7 +1,8 @@
 const express = require('express')
 const serverless = require('serverless-http')
 const bodyParser = require('body-parser')
-const pool = require('./configs/dbConfig')
+// const pool = require('./configs/dbConfig')
+const db = require('./models/index');
 
 const app = express()
 
@@ -13,98 +14,71 @@ app.get('/test',(req,res)=>{
 })
 
 // Handle user GET route for all user
-app.get('/user/', (req, res) => {
-    const query = 'SELECT * FROM user_tb'
-    pool.query(query,(error, results) => {
-        if (error) {
-            console.log(error);
-          throw error
-        }
-        res.status(200).json(results.rows)
-      })
-  })
+ app.get('/user/', async (req, res) => {
+   try {
+    const result = await db.User.findAll({attributes: ['id', 'FirstName','LastName','Email']});
+    return res.send(result); 
+   } catch (err) {
+     console.log(err)
+   }
+ })
 
 // Handle user GET route for specific user
-app.get('/user/:id', (req, res) => {
+app.get('/user/:id', async (req, res) => {
+  try {
     const id = req.params.id
-    const query = `SELECT * FROM user_tb WHERE id=${id}`
-    pool.query(query, (err, results) => {
-      if (err) {
-        const response = { data: null, message: err.message, }
-        res.send(response)
-      }
-  
-      res.status(200).json(results.rows)
-    })
+    const result = await db.User.findOne({where: {id}})
+    if(result){
+      return res.send(result);
+    } else {
+      return res.send('No recoed Found');
+    }
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+// Handle user POST route
+app.post('/user/', async (req, res) => {
+    try {
+      await db.User.create(req.body);
+      res.send('User Added Successfully');
+    } catch (err) {
+      console.log(err)
+    }
   })
 
-  // Handle user POST route
-app.post('/user/', (req, res) => {
-    const { name } = req.body
-  
-    const query = `INSERT INTO user_tb (name) VALUES ('${name}')`
-    pool.query(query, (err, results) => {
-      if (err) {
-        const response = { data: null, message: err.message, }
-        res.send(response)
-      }
-      const { insertId } = results
-      const user = { id: insertId, name }
-      const response = {
-        data: user,
-        message: `user ${name} successfully added.`,
-      }
-      res.status(201).send(response)
-    })
-  })
+// Handle user update post route
+app.post('/user/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const result = await db.User.findOne({where: {id}})
+    if(result){
+      await db.User.update(req.body,{where: {id}})
+      return res.send('User Updated Successfully');
+    } else {
+      return res.send('No recoed Found');
+    }   
+  } catch (err) {
+    console.log(err)
+  } 
+})
 
-  // Handle user update post route
-app.post('/user/:id', (req, res) => {
-    const { id } = req.params
-    const query = `SELECT * FROM user_tb WHERE id=${id}`
-    pool.query(query, (err, results) => {
-      if (err) {
-        const response = { data: null, message: err.message, }
-        res.send(response)
+// Handler user DELETE route
+app.delete('/user/:id', async (req, res) => {
+  try {
+      const { id } = req.params
+      const result = await db.User.findOne({where: {id}})
+      if(result){
+        await db.User.destroy({where: {id}})
+        return res.send('User Deleted Successfully');
+      } else {
+        return res.send('No recoed Found');
       }
-      const userId = {...results.rows};
-      const Id = userId[0].id;
-      const { name } = { ...req.body }
-      const query = `UPDATE user_tb SET name='${name}' WHERE id='${Id}'`
-      pool.query(query, (err, results) => {
-        if (err) {
-          const response = { data: null, message: err.message, }
-          res.send(response)
-        }
-  
-        const user = {
-          id,
-          name,
-        }
-        const response = {
-          data: user,
-          message: `user ${name} is successfully updated.`,
-        }
-        res.send(response)
-      })
-    })
-  })
-
-  // Handler user DELETE route
-app.delete('/user/:id', (req, res) => {
-    const { id } = req.params
-    const query = `DELETE FROM user_tb WHERE id=${id}`
-    pool.query(query, (err, results, fields) => {
-      if (err) {
-        const response = { data: null, message: err.message }
-        res.send(response)
-      }
-  
-      const response = {
-        message: `user with id: ${id} successfully deleted.`,
-      }
-      res.send(response)
-    })
+      
+    } catch (err) {
+      console.log(err);
+    }
   })
 
   module.exports.handler = serverless(app)
