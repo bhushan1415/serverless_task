@@ -12,23 +12,30 @@ functions:
     handler: index.handler
     events:
       - http:
-          path: test
+          path: api/user
           method: get
       - http:
-          path: user
+          path: api/user/{id}
           method: get
       - http:
-          path: user/{id}
-          method: get
-      - http:
-          path: user
+          path: api/user
           method: post
       - http:
-          path: user/{id}
+          path: api/user/{id}
           method: post
       - http:
-          path: user/{id}
+          path: api/user/{id}
           method: delete
+  profileFunc:
+    handler: index.handler
+    events:
+      - http:
+          path: api/profile/{id}
+          method: get
+      - http:
+          path: api/profile
+          method: post
+
 
 plugins:
   - serverless-offline

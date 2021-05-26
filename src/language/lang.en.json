@@ -1,0 +1,11 @@
+{
+    "ERR_INTERNAL_SERVER": "Internal Server Error",
+    "ERR_URL_NOT_FOUND": "Requested URL Not Found",
+    "NO_RECORD_FOUND": "No recoed Found",
+    "USER_ADDED": "User Added Successfully",
+    "USER_UPDATED": "User Updated Successfully",
+    "USER_REMOVED": "User Removed Successfully",
+    "FILL_PROFILE": "Fill Profile",
+    "PROFILE_CREATED": "Profile Created Successfully",
+    "NO_USER_FOUND": "No User Found"
+}
