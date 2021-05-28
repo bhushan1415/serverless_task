@@ -4,7 +4,7 @@ module.exports = class ProfileUtils {
     //get profile by user id
     async GetProfile(id) {
         try {
-            const result = await db.Profile.findAll({include: [{model: db.User, as: "UserProfile"}],where: {user_id: id}});
+            const result = await db.User.findAll({include: [{model: db.Profile, as: "UserProfile", required: true}],where: {id, "$UserProfile.user_id$": id}});
             const resObj = []
             result.map((e)=> {
                 return resObj.push({ProfileId: e.id, FullName: e.fullname, Birthdate: e.birthdate, Gender: e.gender, Position: e.position, Email: e.UserProfile.Email})
